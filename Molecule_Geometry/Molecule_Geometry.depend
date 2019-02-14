@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1535669634 source:c:\users\saif2001\desktop\projects\c++ projects\molecule_geometry\main.cpp
+	<iostream>
+	<vector>
+	<algorithm>
+	<string>
+
