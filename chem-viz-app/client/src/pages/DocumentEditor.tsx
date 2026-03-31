@@ -23,8 +23,8 @@ import CollaboratorBar from '../components/CollaboratorBar';
 import PeriodicTable from '../components/PeriodicTable';
 import type { FormulaEntry } from '../types';
 
-const USER_NAME = `User-${Math.random().toString(36).slice(2, 6)}`;
-const USER_COLOR = `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`;
+const USER_NAME = `User-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36).slice(0, 4)}`;
+const USER_COLOR = `hsl(${crypto.getRandomValues(new Uint16Array(1))[0] % 360}, 70%, 60%)`;
 
 export default function DocumentEditor() {
   const { id } = useParams<{ id: string }>();
