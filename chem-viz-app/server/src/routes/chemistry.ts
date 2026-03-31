@@ -1,24 +1,30 @@
 import { Router } from 'express';
+import type { Response } from 'express';
 import { parseFormula } from '../chemistry/formulaParser.js';
 import { generateGeometry } from '../chemistry/geometryGenerator.js';
 import { periodicTableArray, periodicTableMap } from '../chemistry/periodicTable.js';
 
 const router = Router();
 
-// POST /api/chemistry/parse - parse a formula string
-router.post('/parse', (req, res) => {
-  const { formula } = req.body as { formula?: string };
+const MAX_FORMULA_LENGTH = 500;
 
+function validateFormula(formula: string | undefined, res: Response): string | null {
   if (!formula) {
     res.status(400).json({ error: 'formula is required' });
-    return;
+    return null;
   }
+  const trimmed = formula.trim();
+  if (trimmed.length > MAX_FORMULA_LENGTH) {
+    res.status(400).json({ error: `Formula exceeds maximum length of ${MAX_FORMULA_LENGTH} characters` });
+    return null;
+  }
+  return trimmed;
+}
 
-  const trimmedFormula = formula.trim();
-  if (trimmedFormula.length > 500) {
-    res.status(400).json({ error: 'Formula exceeds maximum length of 500 characters' });
-    return;
-  }
+// POST /api/chemistry/parse - parse a formula string
+router.post('/parse', (req, res) => {
+  const trimmedFormula = validateFormula((req.body as { formula?: string }).formula, res);
+  if (trimmedFormula === null) return;
 
   try {
     const parsed = parseFormula(trimmedFormula);
@@ -31,18 +37,8 @@ router.post('/parse', (req, res) => {
 
 // POST /api/chemistry/geometry - generate 3D geometry for a formula
 router.post('/geometry', (req, res) => {
-  const { formula } = req.body as { formula?: string };
-
-  if (!formula) {
-    res.status(400).json({ error: 'formula is required' });
-    return;
-  }
-
-  const trimmedFormula = formula.trim();
-  if (trimmedFormula.length > 500) {
-    res.status(400).json({ error: 'Formula exceeds maximum length of 500 characters' });
-    return;
-  }
+  const trimmedFormula = validateFormula((req.body as { formula?: string }).formula, res);
+  if (trimmedFormula === null) return;
 
   try {
     const parsed = parseFormula(trimmedFormula);
