@@ -21,13 +21,31 @@ router.post('/', (req, res) => {
     return;
   }
 
+  const trimmedTitle = title.trim();
+  const trimmedOwner = owner.trim();
+
+  if (trimmedTitle.length === 0) {
+    res.status(400).json({ error: 'title cannot be empty' });
+    return;
+  }
+
+  if (trimmedTitle.length > 200) {
+    res.status(400).json({ error: 'title exceeds maximum length of 200 characters' });
+    return;
+  }
+
+  if (trimmedOwner.length > 100) {
+    res.status(400).json({ error: 'owner exceeds maximum length of 100 characters' });
+    return;
+  }
+
   const now = new Date().toISOString();
   const doc: ChemDocument = {
     id: uuidv4(),
-    title,
+    title: trimmedTitle,
     createdAt: now,
     updatedAt: now,
-    owner,
+    owner: trimmedOwner,
     collaborators: [],
     formulas: [],
   };
@@ -59,7 +77,18 @@ router.put('/:id', (req, res) => {
     collaborators?: string[];
   };
 
-  if (title !== undefined) doc.title = title;
+  if (title !== undefined) {
+    const trimmedTitle = title.trim();
+    if (trimmedTitle.length === 0) {
+      res.status(400).json({ error: 'title cannot be empty' });
+      return;
+    }
+    if (trimmedTitle.length > 200) {
+      res.status(400).json({ error: 'title exceeds maximum length of 200 characters' });
+      return;
+    }
+    doc.title = trimmedTitle;
+  }
   if (collaborators !== undefined) doc.collaborators = collaborators;
   doc.updatedAt = new Date().toISOString();
 

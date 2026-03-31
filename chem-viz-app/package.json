@@ -13,7 +13,9 @@
     "install:all": "cd server && npm install && cd ../client && npm install",
     "lint": "npm run lint:server && npm run lint:client",
     "lint:server": "cd server && npm run lint",
-    "lint:client": "cd client && npx tsc --noEmit"
+    "lint:client": "cd client && npx tsc --noEmit",
+    "test": "npm run test:server",
+    "test:server": "cd server && npm test"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        VITE_API_URL: http://localhost:3001
+        VITE_YJS_WS_URL: ws://localhost:3002
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+      - "5173:5173"
+    environment:
+      - PORT=3001
+      - YJS_PORT=3002
+      - CLIENT_ORIGIN=http://localhost:5173
+      - NODE_ENV=production
+    restart: unless-stopped

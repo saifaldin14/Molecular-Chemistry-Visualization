@@ -1,6 +1,8 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
 import { Server as SocketIOServer } from 'socket.io';
 import documentRoutes from './routes/documents.js';
 import chemistryRoutes from './routes/chemistry.js';
@@ -16,11 +18,31 @@ const server = http.createServer(app);
 
 // Middleware
 app.use(cors({ origin: CLIENT_ORIGIN }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// Rate limiters
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
+const chemistryLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many chemistry requests, please try again later' },
+});
+
+app.use('/api', apiLimiter);
 
 // REST API routes
 app.use('/api/documents', documentRoutes);
-app.use('/api/chemistry', chemistryRoutes);
+app.use('/api/chemistry', chemistryLimiter, chemistryRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

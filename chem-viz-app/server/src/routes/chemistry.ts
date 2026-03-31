@@ -14,8 +14,14 @@ router.post('/parse', (req, res) => {
     return;
   }
 
+  const trimmedFormula = formula.trim();
+  if (trimmedFormula.length > 500) {
+    res.status(400).json({ error: 'Formula exceeds maximum length of 500 characters' });
+    return;
+  }
+
   try {
-    const parsed = parseFormula(formula);
+    const parsed = parseFormula(trimmedFormula);
     res.json(parsed);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to parse formula';
@@ -32,8 +38,14 @@ router.post('/geometry', (req, res) => {
     return;
   }
 
+  const trimmedFormula = formula.trim();
+  if (trimmedFormula.length > 500) {
+    res.status(400).json({ error: 'Formula exceeds maximum length of 500 characters' });
+    return;
+  }
+
   try {
-    const parsed = parseFormula(formula);
+    const parsed = parseFormula(trimmedFormula);
     const geometry = generateGeometry(parsed);
     res.json({ parsed, geometry });
   } catch (err) {

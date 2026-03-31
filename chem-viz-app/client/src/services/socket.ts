@@ -2,7 +2,7 @@ import { io } from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 import type { CollabUser, FormulaEntry } from '../types';
 
-const SOCKET_URL = 'http://localhost:3001/collab';
+const SOCKET_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/collab`;
 
 let socket: Socket | null = null;
 

@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import type { FormulaEntry, CollabUser } from '../types';
 
-const YJS_WS_URL = 'ws://localhost:3002';
+const YJS_WS_URL = import.meta.env.VITE_YJS_WS_URL || 'ws://localhost:3002';
 
 interface UseCollaborationReturn {
   formulas: FormulaEntry[];
