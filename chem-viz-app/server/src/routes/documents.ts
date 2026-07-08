@@ -1,10 +1,27 @@
 import { Router } from 'express';
+import type { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import type { ChemDocument, FormulaEntry } from '../types.js';
 
 const router = Router();
 
+const MAX_TITLE_LENGTH = 200;
+const MAX_OWNER_LENGTH = 100;
+
 const documents = new Map<string, ChemDocument>();
+
+function validateTitle(title: string, res: Response): string | null {
+  const trimmed = title.trim();
+  if (trimmed.length === 0) {
+    res.status(400).json({ error: 'title cannot be empty' });
+    return null;
+  }
+  if (trimmed.length > MAX_TITLE_LENGTH) {
+    res.status(400).json({ error: `title exceeds maximum length of ${MAX_TITLE_LENGTH} characters` });
+    return null;
+  }
+  return trimmed;
+}
 
 // GET /api/documents - list all documents
 router.get('/', (_req, res) => {
@@ -21,13 +38,23 @@ router.post('/', (req, res) => {
     return;
   }
 
+  const trimmedTitle = validateTitle(title, res);
+  if (trimmedTitle === null) return;
+
+  const trimmedOwner = owner.trim();
+
+  if (trimmedOwner.length > MAX_OWNER_LENGTH) {
+    res.status(400).json({ error: `owner exceeds maximum length of ${MAX_OWNER_LENGTH} characters` });
+    return;
+  }
+
   const now = new Date().toISOString();
   const doc: ChemDocument = {
     id: uuidv4(),
-    title,
+    title: trimmedTitle,
     createdAt: now,
     updatedAt: now,
-    owner,
+    owner: trimmedOwner,
     collaborators: [],
     formulas: [],
   };
@@ -59,7 +86,11 @@ router.put('/:id', (req, res) => {
     collaborators?: string[];
   };
 
-  if (title !== undefined) doc.title = title;
+  if (title !== undefined) {
+    const trimmedTitle = validateTitle(title, res);
+    if (trimmedTitle === null) return;
+    doc.title = trimmedTitle;
+  }
   if (collaborators !== undefined) doc.collaborators = collaborators;
   doc.updatedAt = new Date().toISOString();
 
